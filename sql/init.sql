@@ -1,0 +1,1 @@
+insert into t_category(category_name) values('科技'),('财经'),('文学'),('历史'),('科幻');

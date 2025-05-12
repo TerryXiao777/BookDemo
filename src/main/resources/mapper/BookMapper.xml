@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.BookMapper">
+    <resultMap id="BookMap" type="com.demo.entity.Book">
+        <result column="book_id" property="bookId"/>
+        <result column="book_name" property="bookName"/>
+        <result column="author_name" property="authorName"/>
+        <result column="price" property="price"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="status" property="status"/>
+        <result column="book_url" property="bookUrl"/>
+        <result column="book_address" property="bookAddress"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="table_column_list">
+        book_id,book_name,author_name,price,category_id,create_time,status,book_url,book_address,update_time
+    </sql>
+
+    <sql id="property_list">
+        #{bookId},
+        #{bookName},
+        #{authorName},
+        #{price},
+        #{categoryId},
+        #{createTime},
+        #{status},
+        #{bookUrl},
+        #{bookAddress},
+        #{updateTime}
+    </sql>
+
+    <insert id="saveBook" parameterType="com.demo.entity.Book">
+        insert into t_book (<include refid="table_column_list"/>) values (<include refid="property_list"/>)
+    </insert>
+
+    <update id="updateBook" parameterType="com.demo.entity.Book">
+        update t_book
+        <set>
+            <if test="bookName!=null and bookName!=''">
+                book_name = #{bookName},
+            </if>
+            <if test="authorName!=null and authorName!=''">
+                author_name = #{authorName},
+            </if>
+            <if test="price!=null">
+                price = #{price},
+            </if>
+            <if test="categoryId!=null">
+                category_id = #{categoryId},
+            </if>
+            <if test="updateTime!=null">
+                update_time = #{updateTime},
+            </if>
+            <if test="status!=null and status!=''">
+                status = #{status},
+            </if>
+            <if test="bookUrl!=null and bookUrl!=''">
+                book_url = #{bookUrl},
+            </if>
+            <if test="bookAddress!=null and bookAddress!=''">
+                book_address = #{bookAddress}
+            </if>
+        </set>
+        where book_id = #{bookId}
+    </update>
+
+    <delete id="deleteBookById" parameterType="int">
+        delete from t_book where book_id = #{bookId}
+    </delete>
+
+    <delete id="batchDeleteBook">
+        delete from t_book where
+        book_id in 
+        <foreach collection="list" item="bookId" open="(" close=")" separator=",">
+            #{bookId}
+        </foreach>
+    </delete>
+
+    <select id="selectBooksByParams" resultMap="BookMap">
+        select b.*, c.category_name from t_book b, t_category c
+        <where>
+            b.category_id = c.category_id
+            <if test="bookName!=null and bookName != ''">
+                and book_name like concat('%', #{bookName}, '%')
+            </if>
+            <if test="categoryId!=null">
+                and b.category_id = #{categoryId}
+            </if>
+            <if test="status!=null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="start!=null and end !=null">
+                and create_time <![CDATA[>=]]> #{start} and create_time <![CDATA[<=]]> #{end}
+            </if>
+        </where>
+        order by book_id desc
+    </select>
+</mapper>
